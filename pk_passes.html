@@ -1,20 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
-    <title>Download Pass</title>
-</head>
-<body>
-    <h1>Download Pass</h1>
-    <p>Click the links below to add the pass to your Apple Wallet.</p>
-
-    <!--
-      Replace "https://pass-server.onrender.com" with YOUR actual Render app URL.
-      These links now point to your live Python server which sends the correct headers.
-    -->
-    <a href="https://pass-server-pi72.onrender.com/download-pkpass">Download Single PKPass</a>
-    <br><br>
-    <a href="https://pass-server-pi72.onrender.com/download-bundle">Download Pass Bundle</a>
-
-</body>
+    <title>Title</title>
+  </head>
+  <body>
+    <iframe srcdoc='<a href="/download-pkpass">Download PKPass</a>'></iframe>
+    <iframe srcdoc='<a href="/download-bundle">Download PKPass Bundle</a>'></iframe>
+  </body>
 </html>
