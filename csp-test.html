@@ -1,0 +1,12 @@
+<!doctype html><html><head>
+<meta charset="utf-8"><title>Reader CSP Verify</title>
+<meta http-equiv="Content-Security-Policy"
+  content="img-src 'none'; style-src 'none'; script-src 'none'; report-uri https://<your-collector>/leak; report-to leakgroup">
+<meta http-equiv="Reporting-Endpoints" content="leakgroup=&quot;https://<your-collector>/leak&quot;">
+<meta http-equiv="Content-Security-Policy"
+  content="default-src 'none'; report-uri https://<your-collector>/leak2">
+</head><body><article>
+<h1>Reader CSP Verification Article</h1>
+<img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg">
+<p>[paste 8–10 long paragraphs of filler text so Reader Mode offers the reader icon]</p>
+</article></body></html>
